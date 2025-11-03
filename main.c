@@ -223,6 +223,9 @@ BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
     if (a.taille == 0) return b;
     if (b.taille == 0) return a;
     BigBinary result = createBigBinary(a.taille);
+    if ((egaliteBigBinary(a , b) == 1)) return createBigBinary(1);
+    if (inferieurBigBinary(a , b) == 1) return a;
+
     
 
 
