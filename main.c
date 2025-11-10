@@ -222,13 +222,12 @@ BigBinary BigBinary_PGCD(BigBinary a , BigBinary b){
 BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
     if (a.taille == 0) return b;
     if (b.taille == 0) return a;
-    BigBinary result = createBigBinary(a.taille);
     if ((egaliteBigBinary(a , b) == 1)) return createBigBinary(1);
     if (inferieurBigBinary(a , b) == 1) return a;
-
-    
-
-
+    while (!inferieurBigBinary(a,b)){
+        a = soustractionBigBinary(a,b);
+    }
+    return a;
 }
 
 int main() {
@@ -241,8 +240,7 @@ int main() {
     BigBinary a = creeBigBinaryDepuisChaine(nb1);
     BigBinary b = creeBigBinaryDepuisChaine(nb2);
 
-    afficherBigBinary(a);
-    afficherBigBinary(b);
+    afficherBigBinary(BigBinary_mod(a,b));
     libereBigBinary(&a);
     libereBigBinary(&b);
 
