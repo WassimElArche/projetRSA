@@ -11,7 +11,7 @@ typedef struct{
 } BigBinary;
 
 
-
+// PHASE 1
 
 BigBinary creeBigBinaryDepuisChaine(const char *chaine) {
     BigBinary nb;
@@ -197,6 +197,8 @@ BigBinary additionBigBinary(BigBinary bigBinary1 , BigBinary bigBinary2) {
     return result;
 }
 
+
+//PHASE 2
 BigBinary BigBinary_PGCD(BigBinary a , BigBinary b){
     BigBinary u, v;
     if (egaliteBigBinary(a , b) == 1) return a;
@@ -235,12 +237,12 @@ int main() {
     printf("Entrez le premier entier");
     scanf("%s" , nb1);
 
-    printf("Entrez le premier entier");
+    printf("Entrez le deuxieme entier");
     scanf("%s" , nb2);
     BigBinary a = creeBigBinaryDepuisChaine(nb1);
     BigBinary b = creeBigBinaryDepuisChaine(nb2);
 
-    afficherBigBinary(BigBinary_mod(a,b));
+    afficherBigBinary(a);//BigBinary_mod(a,b));
     libereBigBinary(&a);
     libereBigBinary(&b);
 
