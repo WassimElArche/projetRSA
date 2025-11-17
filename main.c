@@ -233,7 +233,8 @@ BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
 }
 
 int main() {
-    char nb1[20] , nb2[20];
+
+    char nb1[80] , nb2[20];
     printf("Entrez le premier entier");
     scanf("%s" , nb1);
 
@@ -241,10 +242,11 @@ int main() {
     scanf("%s" , nb2);
     BigBinary a = creeBigBinaryDepuisChaine(nb1);
     BigBinary b = creeBigBinaryDepuisChaine(nb2);
-
     afficherBigBinary(a);//BigBinary_mod(a,b));
     libereBigBinary(&a);
     libereBigBinary(&b);
+
+
 
     return 0;
 }
