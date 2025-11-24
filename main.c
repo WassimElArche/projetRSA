@@ -221,6 +221,11 @@ BigBinary BigBinary_PGCD(BigBinary a , BigBinary b){
     return u;
 }
 
+BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
+
+}
+
+
 BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
     if (inferieurBigBinary(b,a)) BigBinary_mod(soustractionBigBinary(a,b) ,b);
     if (inferieurBigBinary(a , b) == 1) return a;
