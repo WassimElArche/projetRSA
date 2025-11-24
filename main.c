@@ -222,10 +222,17 @@ BigBinary BigBinary_PGCD(BigBinary a , BigBinary b){
 }
 
 BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
-    if (a.taille == 0) return b;
-    if (b.taille == 0) return a;
-    if ((egaliteBigBinary(a , b) == 1)) return createBigBinary(1);
+    if (inferieurBigBinary(b,a)) BigBinary_mod(soustractionBigBinary(a,b) ,b);
     if (inferieurBigBinary(a , b) == 1) return a;
+    BigBinary nombreDeb = b;
+    int i = 1;
+    while (inferieurBigBinary(nombreDeb,a) == 1) {
+        if (inferieurBigBinary(additionBigBinary(nombreDeb,nombreDeb) ,a) == 1) {
+            nombreDeb = additionBigBinary(nombreDeb,nombreDeb);
+            i+=1;
+        }
+    }
+    if (i>1) BigBinary_mod(soustractionBigBinary(a,nombreDeb),b);
     while (!inferieurBigBinary(a,b)){
         a = soustractionBigBinary(a,b);
     }
