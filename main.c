@@ -72,6 +72,8 @@ BigBinary createBigBinary(int taille) {
 int inferieurBigBinary(BigBinary bigBinary1 , BigBinary bigBinary2) {
     if (bigBinary1.Signe < bigBinary2.Signe) return 1;
     if (bigBinary1.Signe > bigBinary2.Signe) return 0;
+    if (bigBinary1.taille < bigBinary2.taille) return 1;
+    if (bigBinary1.taille > bigBinary2.taille) return 0;
     for (int i = 0; i < bigBinary1.taille; i++) {
         if (bigBinary1.Tdigits[i] < bigBinary2.Tdigits[i]) return 1;
         if (bigBinary1.Tdigits[i] > bigBinary2.Tdigits[i]) return 0;
@@ -221,26 +223,53 @@ BigBinary BigBinary_PGCD(BigBinary a , BigBinary b){
     return u;
 }
 
-BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
 
+
+BigBinary multiplicationEgyptienne(BigBinary bigBinary1 , BigBinary bigBinary2) {
+    for (int i = 0 ; i < bigBinary2.taille ; i++) {
+        if (bigBinary2.Tdigits[i] == 1) {
+            bigBinary1 = additionBigBinary(bigBinary1,bigBinary1);
+        }
+    }
+    return bigBinary1;
+}
+
+int BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
+    BigBinary u = a;
+    for (int i = 0 ; i < e ; i++) {
+        u = multiplicationEgyptienne(a,u);
+    }
+    return 0;
 }
 
 
 BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
-    if (inferieurBigBinary(b,a)) BigBinary_mod(soustractionBigBinary(a,b) ,b);
-    if (inferieurBigBinary(a , b) == 1) return a;
+    //ici c simplification du mod
     BigBinary nombreDeb = b;
     int i = 1;
-    while (inferieurBigBinary(nombreDeb,a) == 1) {
-        if (inferieurBigBinary(additionBigBinary(nombreDeb,nombreDeb) ,a) == 1) {
+    while (inferieurBigBinary(additionBigBinary(nombreDeb,nombreDeb) ,a) == 1) {
             nombreDeb = additionBigBinary(nombreDeb,nombreDeb);
-            i+=1;
+            i = 2;
         }
+
+    if (i>1) {
+         a = soustractionBigBinary(a , nombreDeb);
     }
-    if (i>1) BigBinary_mod(soustractionBigBinary(a,nombreDeb),b);
-    while (!inferieurBigBinary(a,b)){
-        a = soustractionBigBinary(a,b);
+    afficherBigBinary(a);
+    printf("OK \n");
+    if (egaliteBigBinary(a , b) == 1) return createBigBinary(1);
+    BigBinary temp;
+    while (inferieurBigBinary(b, a) == 1) {
+        printf("OK");
+        temp = soustractionBigBinary(a, b);
+        if (inferieurBigBinary(temp, b) != 1) break;
+        a = temp;
+
     }
+//11000000 192
+    //100001 33
+    //11011 27
+
     return a;
 }
 
@@ -254,12 +283,10 @@ int main() {
     scanf("%s" , nb2);
     BigBinary a = creeBigBinaryDepuisChaine(nb1);
     BigBinary b = creeBigBinaryDepuisChaine(nb2);
-    afficherBigBinary(a);//BigBinary_mod(a,b));
+    afficherBigBinary(BigBinary_mod(a,b));
+    //afficherBigBinary(multiplicationEgyptienne(a,b));//BigBinary_mod(a,b));
     libereBigBinary(&a);
     libereBigBinary(&b);
-
-
-
     return 0;
 }
 
