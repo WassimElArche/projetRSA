@@ -238,10 +238,18 @@ BigBinary copiesBigBinary(BigBinary bigBinary) {
 
 BigBinary multiplicationEgyptienne(BigBinary bigBinary1 , BigBinary bigBinary2) {
     int nb = bigBinary2.taille;
-    BigBinary result = copiesBigBinary(bigBinary1);
+    BigBinary result = bigBinary1;
     for (int i = 1 ; i < nb ;i++) {
         bigBinary1 = additionBigBinary(bigBinary1,bigBinary1);
         if (bigBinary2.taille != 1) bigBinary2.taille = bigBinary2.taille-1;
+        printf("Iteration : %d\n" ,i );
+        printf("A = ");
+        afficherBigBinary(bigBinary1);
+        printf("B = ");
+
+        afficherBigBinary(bigBinary2);
+        printf("RESULTAT : ");
+        afficherBigBinary(result);
         if (bigBinary2.Tdigits[bigBinary2.taille-1] == 1) {
             result = additionBigBinary(result,bigBinary1);
         }
@@ -326,18 +334,30 @@ BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
 
 int main() {
 
-    char nb1[100] , nb2[100];
-    printf("Entrez le premier entier");
-    scanf("%s" , nb1);
+    printf("Test 6: 15 * 8 (1111 * 1000)\n");
+    BigBinary m11 = creeBigBinaryDepuisChaine("1101");  // 15
+    BigBinary m12 = creeBigBinaryDepuisChaine("1011");  // 8
+    BigBinary resM6 = multiplicationEgyptienne(m11, m12);
+    printf("Resultat: ");
+    afficherBigBinary(resM6);
+    libereBigBinary(&m11);
+    libereBigBinary(&m12);
+    libereBigBinary(&resM6);
 
-    printf("Entrez le deuxieme entier");
-    scanf("%s" , nb2);
-    BigBinary a = creeBigBinaryDepuisChaine(nb1);
-    BigBinary b = creeBigBinaryDepuisChaine(nb2);
-    afficherBigBinary(BigBinary_expo(a,b,17));
-    //afficherBigBinary(multiplicationEgyptienne(a,b));
-    //afficherBigBinary(BigBinary_mod(a,b));
-    libereBigBinary(&a);
-    libereBigBinary(&b);
+
+    /*
+    // Test 6: Grand nombre
+    printf("Test 6: 15 * 8 (1111 * 1000)\n");
+    BigBinary m11 = creeBigBinaryDepuisChaine("1111");  // 15
+    BigBinary m12 = creeBigBinaryDepuisChaine("1000");  // 8
+    BigBinary resM6 = multiplicationEgyptienne(m11, m12);
+    printf("Resultat: ");
+    afficherBigBinary(resM6);
+    printf("Attendu:  1111000 (120 en decimal)\n");
+    printf("Verification: 15 * 8 = 120 ✓\n\n");
+    libereBigBinary(&m11);
+    libereBigBinary(&m12);
+    libereBigBinary(&resM6);*/
+
     return 0;
 }
