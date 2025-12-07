@@ -22,6 +22,7 @@ BigBinary creeBigBinaryDepuisChaine(const char *chaine) {
             nb.taille++;
         }
     }
+    printf("taille = %d\n", nb.taille);
     nb.Tdigits = malloc(nb.taille * sizeof(int));
     nb.Signe = 1;
     int index = 0;
@@ -239,22 +240,17 @@ BigBinary BigBinary_PGCD(BigBinary a , BigBinary b){
 
 
 BigBinary multiplicationEgyptienne(BigBinary bigBinary1 , BigBinary bigBinary2) {
-    for (int i = 0 ; i < bigBinary2.taille ; i++) {
-        if (bigBinary2.Tdigits[i] == 1) {
-            bigBinary1 = additionBigBinary(bigBinary1,bigBinary1);
+    int nb = bigBinary2.taille;
+    BigBinary result = bigBinary1;
+    for (int i = 1 ; i < nb ;i++) {
+        bigBinary1 = additionBigBinary(bigBinary1,bigBinary1);
+        if (bigBinary2.taille != 1) bigBinary2.taille = bigBinary2.taille-1;
+        if (bigBinary2.Tdigits[bigBinary2.taille-1] == 1) {
+            result = additionBigBinary(result,bigBinary1);
         }
     }
-    return bigBinary1;
+    return result;
 }
-
-int BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
-    BigBinary u = a;
-    for (int i = 0 ; i < e ; i++) {
-        u = multiplicationEgyptienne(a,u);
-    }
-    return 0;
-}
-
 
 BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
     //ici c simplification du mod
@@ -267,17 +263,63 @@ BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
     if (i>1) {
          a = soustractionBigBinary(a , nombreDeb);
     }
-    afficherBigBinary(a);
-    afficherBigBinary(b);
     while (inferieurBigBinary(b, a) == 1) {
         a = soustractionBigBinary(a, b);
     }
     return a;
 }
 
+void retirerZeroBigBinary(BigBinary *a) {
+    int i = 0;
+    while (i < a->taille && a->Tdigits[i] == 0) i++;
+
+    if (i == a->taille) {
+        a->taille = 1;
+        a->Signe = 0;
+        a->Tdigits[0] = 0;
+        return;
+    }
+    for (int j = i; j < a->taille; j++) {
+        a->Tdigits[j - i] = a->Tdigits[j];
+    }
+    a->taille -= i;
+    a->Signe = 1;
+}
+
+
+BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
+    afficherBigBinary(BigBinary_mod(
+               multiplicationEgyptienne(BigBinary_mod(a,n) , BigBinary_mod(a,n))
+           ,n));
+    /*BigBinary result = initBigBinary(50,1);
+    result.Tdigits[31] = 1;
+    unsigned binaireE[32];
+    for (int i = 0 ; i < 32 ; i++) {
+        binaireE[31-i] = (e >> i) & 1;
+    }
+    result = BigBinary_mod(
+            multiplicationEgyptienne(BigBinary_mod(a,n) , BigBinary_mod(a,n))
+        ,n);
+    afficherBigBinary(result);
+    for (int i = 0; i < 32; i++) {
+    if (binaireE[i] == 1) {
+
+    }
+    retirerZeroBigBinary(&a);
+    retirerZeroBigBinary(&result);
+}
+
+    printf("\n");
+    //10000000000000000000000000000000000000000001111111010110100101011011011001011001010111010
+    //10100011000010111111011001110010101101100100111110001101000001001111000000110000111010111*/
+    return a;
+}
+
+
+
 int main() {
 
-    char nb1[80] , nb2[20];
+    char nb1[100] , nb2[100];
     printf("Entrez le premier entier");
     scanf("%s" , nb1);
 
@@ -285,8 +327,9 @@ int main() {
     scanf("%s" , nb2);
     BigBinary a = creeBigBinaryDepuisChaine(nb1);
     BigBinary b = creeBigBinaryDepuisChaine(nb2);
-    afficherBigBinary(BigBinary_mod(a,b));
-    //afficherBigBinary(multiplicationEgyptienne(a,b));//BigBinary_mod(a,b));
+    afficherBigBinary(BigBinary_expo(a,b,17));
+    //afficherBigBinary(multiplicationEgyptienne(a,b));
+    //afficherBigBinary(BigBinary_mod(a,b));
     libereBigBinary(&a);
     libereBigBinary(&b);
     return 0;
