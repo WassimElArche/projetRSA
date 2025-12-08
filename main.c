@@ -307,12 +307,13 @@ BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
     for (int i = 0 ; i < 32 ; i++) {
         bits[31-i] = (e>>i) & 1;
     }
-    int IndicePremierBit;
+    int IndicePremierBit = -1;
     for (int i = 0;i<31 ; i++) {
         if (bits[i] == 1) {
             IndicePremierBit = i;
         }
     }
+    if (IndicePremierBit == -1) return BigBinary_mod(a,n);
     for (int i = IndicePremierBit ; i <= 31 ; i++) {
         result = BigBinary_mod(multiplicationEgyptienne(result,result),n);
         if (bits[i] == 1) {
