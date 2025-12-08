@@ -22,7 +22,6 @@ BigBinary creeBigBinaryDepuisChaine(const char *chaine) {
             nb.taille++;
         }
     }
-    printf("taille = %d\n", nb.taille);
     nb.Tdigits = malloc(nb.taille * sizeof(int));
     nb.Signe = 1;
     int index = 0;
@@ -119,7 +118,7 @@ int maxTaille(int a , int b) {
 BigBinary soustractionBigBinary(BigBinary bigBinary1, BigBinary bigBinary2) {
 
     int taille = (bigBinary1.taille > bigBinary2.taille) ? bigBinary1.taille : bigBinary2.taille;
-    int* resultat = calloc(taille + 1, sizeof(int));
+    int* resultat = malloc((taille + 1)*sizeof(int));
 
     int i = bigBinary1.taille - 1;
     int j = bigBinary2.taille - 1;
@@ -242,14 +241,6 @@ BigBinary multiplicationEgyptienne(BigBinary bigBinary1 , BigBinary bigBinary2) 
     for (int i = 1 ; i < nb ;i++) {
         bigBinary1 = additionBigBinary(bigBinary1,bigBinary1);
         if (bigBinary2.taille != 1) bigBinary2.taille = bigBinary2.taille-1;
-        printf("Iteration : %d\n" ,i );
-        printf("A = ");
-        afficherBigBinary(bigBinary1);
-        printf("B = ");
-
-        afficherBigBinary(bigBinary2);
-        printf("RESULTAT : ");
-        afficherBigBinary(result);
         if (bigBinary2.Tdigits[bigBinary2.taille-1] == 1) {
             result = additionBigBinary(result,bigBinary1);
         }
@@ -309,17 +300,20 @@ BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
     return a;
 }
 
-
-
-
 BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
-    BigBinary result = initBigBinary(50,1);
-    result.Tdigits[31] = 1;
-    int bits[32];
+    BigBinary result = initBigBinary(1,1);
+    result.Tdigits[0] = 1;
+    unsigned int bits[32];
     for (int i = 0 ; i < 32 ; i++) {
         bits[31-i] = (e>>i) & 1;
     }
-    for (int i = 0 ; i < 32 ; i++) {
+    int IndicePremierBit;
+    for (int i = 0;i<31 ; i++) {
+        if (bits[i] == 1) {
+            IndicePremierBit = i;
+        }
+    }
+    for (int i = IndicePremierBit ; i <= 31 ; i++) {
         result = BigBinary_mod(multiplicationEgyptienne(result,result),n);
         if (bits[i] == 1) {
             result = BigBinary_mod(multiplicationEgyptienne(result, a),n);
@@ -332,12 +326,14 @@ BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
 
 
 
+
+
 int main() {
 
     printf("Test 6: 15 * 8 (1111 * 1000)\n");
-    BigBinary m11 = creeBigBinaryDepuisChaine("1101");  // 15
-    BigBinary m12 = creeBigBinaryDepuisChaine("1011");  // 8
-    BigBinary resM6 = multiplicationEgyptienne(m11, m12);
+    BigBinary m11 = creeBigBinaryDepuisChaine("1110111");  // 15
+    BigBinary m12 = creeBigBinaryDepuisChaine("10110");  // 8
+    BigBinary resM6 = BigBinary_expo(m11,m12,4);
     printf("Resultat: ");
     afficherBigBinary(resM6);
     libereBigBinary(&m11);
