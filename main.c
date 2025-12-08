@@ -326,15 +326,24 @@ BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
 }
 
 
+BigBinary chiffrement_RSA(BigBinary a , BigBinary n , unsigned int e) {
+    return BigBinary_expo(a,n,e);
+}
+
+BigBinary dechiffrement_RSA(BigBinary a , BigBinary n , unsigned int e) {
+    return initBigBinary(1,1);
+}
+
+
 
 
 
 int main() {
 
     printf("Test 6: 15 * 8 (1111 * 1000)\n");
-    BigBinary m11 = creeBigBinaryDepuisChaine("10100011000010111111011001110010101101100100111110001101000001001111000000110000111010111");  // 15
-    BigBinary m12 = creeBigBinaryDepuisChaine("10000000000000000000000000000000000000000001111111010110100101011011011001011001010111010");  // 8
-    BigBinary resM6 = BigBinary_expo(m11,m12,17);
+    BigBinary m11 = creeBigBinaryDepuisChaine("11000011010011111");  // 15
+    BigBinary m12 = creeBigBinaryDepuisChaine("1001001110101111100001");  // 8
+    BigBinary resM6 = chiffrement_RSA(m11 ,m12 , 101 );
     printf("Resultat: ");
     afficherBigBinary(resM6);
     libereBigBinary(&m11);
