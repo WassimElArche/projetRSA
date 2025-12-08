@@ -332,9 +332,9 @@ BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
 int main() {
 
     printf("Test 6: 15 * 8 (1111 * 1000)\n");
-    BigBinary m11 = creeBigBinaryDepuisChaine("1110111");  // 15
-    BigBinary m12 = creeBigBinaryDepuisChaine("10110");  // 8
-    BigBinary resM6 = BigBinary_expo(m11,m12,4);
+    BigBinary m11 = creeBigBinaryDepuisChaine("10100011000010111111011001110010101101100100111110001101000001001111000000110000111010111");  // 15
+    BigBinary m12 = creeBigBinaryDepuisChaine("10000000000000000000000000000000000000000001111111010110100101011011011001011001010111010");  // 8
+    BigBinary resM6 = BigBinary_expo(m11,m12,17);
     printf("Resultat: ");
     afficherBigBinary(resM6);
     libereBigBinary(&m11);
