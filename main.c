@@ -11,8 +11,6 @@ typedef struct{
 } BigBinary;
 
 
-// PHASE 1
-
 BigBinary creeBigBinaryDepuisChaine(const char *chaine) {
     BigBinary nb;
     int n = strlen(chaine);
@@ -71,7 +69,6 @@ BigBinary createBigBinary(int taille) {
 }
 
 int inferieurBigBinary(BigBinary bigBinary1, BigBinary bigBinary2){
-    //vrai taille psq si taille dif et les premier bit sont 0 alors inutile
     int i1 = 0;
     while (i1 < bigBinary1.taille && bigBinary1.Tdigits[i1] == 0) i1++;
     int taille1 = bigBinary1.taille - i1;
@@ -202,7 +199,6 @@ BigBinary additionBigBinary(BigBinary bigBinary1 , BigBinary bigBinary2) {
 }
 
 
-//PHASE 2
 BigBinary BigBinary_PGCD(BigBinary a , BigBinary b){
     BigBinary u, v;
     if (egaliteBigBinary(a , b) == 1) return a;
@@ -225,6 +221,8 @@ BigBinary BigBinary_PGCD(BigBinary a , BigBinary b){
     return u;
 }
 
+
+
 BigBinary copiesBigBinary(BigBinary bigBinary) {
     BigBinary result = createBigBinary(bigBinary.taille);
     for (int i = 0 ; i < bigBinary.taille ; i++) {
@@ -235,23 +233,30 @@ BigBinary copiesBigBinary(BigBinary bigBinary) {
 }
 
 
-BigBinary multiplicationEgyptienne(BigBinary bigBinary1 , BigBinary bigBinary2) {
-    int nb = bigBinary2.taille;
-    BigBinary result = bigBinary1;
-    for (int i = 1 ; i < nb ;i++) {
-        bigBinary1 = additionBigBinary(bigBinary1,bigBinary1);
-        if (bigBinary2.taille != 1) bigBinary2.taille = bigBinary2.taille-1;
-        if (bigBinary2.Tdigits[bigBinary2.taille-1] == 1) {
-            result = additionBigBinary(result,bigBinary1);
+BigBinary multiplicationEgyptienne(BigBinary bigBinary1, BigBinary bigBinary2) {
+    BigBinary result = initBigBinary(1, 0);
+    result.Tdigits[0] = 0;
+    BigBinary puissance = copiesBigBinary(bigBinary1);
+    for (int i = bigBinary2.taille - 1; i >= 0; i--) {
+        if (bigBinary2.Tdigits[i] == 1) {  // Bit LSB = 1 ?
+            BigBinary temp = additionBigBinary(result, puissance);
+            libereBigBinary(&result);
+            result = temp;
+        }
+        if (i > 0) {
+            BigBinary temp = additionBigBinary(puissance, puissance);
+            libereBigBinary(&puissance);
+            puissance = temp;
         }
     }
+
+    libereBigBinary(&puissance);
     return result;
 }
 
 void retirerZeroBigBinary(BigBinary *a) {
     int i = 0;
     while (i < a->taille && a->Tdigits[i] == 0) i++;
-
     if (i == a->taille) {
         a->taille = 1;
         a->Signe = 0;
@@ -266,10 +271,11 @@ void retirerZeroBigBinary(BigBinary *a) {
 }
 
 BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
+    BigBinary resultat = copiesBigBinary(a);
     BigBinary nombreDeb = copiesBigBinary(b);
     int i = 1;
     BigBinary doubleDeb = additionBigBinary(nombreDeb, nombreDeb);
-    while (inferieurBigBinary(doubleDeb, a) == 1) {
+    while (inferieurBigBinary(doubleDeb, resultat) == 1) {
         libereBigBinary(&nombreDeb);
         nombreDeb = doubleDeb;
         doubleDeb = additionBigBinary(nombreDeb, nombreDeb);
@@ -277,93 +283,101 @@ BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
     }
     libereBigBinary(&doubleDeb);
     if (i > 1) {
-        BigBinary temp = soustractionBigBinary(a, nombreDeb);
-        a = temp;
+        BigBinary temp = soustractionBigBinary(resultat, nombreDeb);
+        libereBigBinary(&resultat);
+        resultat = temp;
     }
     libereBigBinary(&nombreDeb);
-    while (inferieurBigBinary(b, a) == 1 || egaliteBigBinary(b, a) == 1) {
+    while (inferieurBigBinary(b, resultat) == 1 || egaliteBigBinary(b, resultat) == 1) {
         nombreDeb = copiesBigBinary(b);
         doubleDeb = additionBigBinary(nombreDeb, nombreDeb);
 
-        while (inferieurBigBinary(doubleDeb, a) == 1 || egaliteBigBinary(doubleDeb, a) == 1) {
+        while (inferieurBigBinary(doubleDeb, resultat) == 1 || egaliteBigBinary(doubleDeb, resultat) == 1) {
             libereBigBinary(&nombreDeb);
             nombreDeb = doubleDeb;
             doubleDeb = additionBigBinary(nombreDeb, nombreDeb);
         }
         libereBigBinary(&doubleDeb);
-        BigBinary temp = soustractionBigBinary(a, nombreDeb);
-        a = temp;
+        BigBinary temp = soustractionBigBinary(resultat, nombreDeb);
+        libereBigBinary(&resultat);
+        resultat = temp;
         libereBigBinary(&nombreDeb);
-        retirerZeroBigBinary(&a);
+        retirerZeroBigBinary(&resultat);
     }
 
-    return a;
+    return resultat;
 }
 
-BigBinary BigBinary_expo(BigBinary a , BigBinary n , unsigned int e) {
-    BigBinary result = initBigBinary(1,1);
-    result.Tdigits[0] = 1;
+BigBinary BigBinary_expo(BigBinary a, BigBinary n, unsigned int e) {
+    if (e == 0) {
+        BigBinary result = initBigBinary(1, 1);
+        result.Tdigits[0] = 1;
+        return result;
+    }
     unsigned int bits[32];
-    for (int i = 0 ; i < 32 ; i++) {
-        bits[31-i] = (e>>i) & 1;
+    for (int i = 0; i < 32; i++) {
+        bits[31 - i] = (e >> i) & 1;
     }
     int IndicePremierBit = -1;
-    for (int i = 0;i<31 ; i++) {
+    for (int i = 0; i < 32; i++) {
         if (bits[i] == 1) {
             IndicePremierBit = i;
+            break;
         }
     }
-    if (IndicePremierBit == -1) return BigBinary_mod(a,n);
-    for (int i = IndicePremierBit ; i <= 31 ; i++) {
-        result = BigBinary_mod(multiplicationEgyptienne(result,result),n);
+    if (IndicePremierBit == -1) {
+        BigBinary result = initBigBinary(1, 1);
+        result.Tdigits[0] = 1;
+        return result;
+    }
+    BigBinary aCopie = copiesBigBinary(a);
+    BigBinary result = BigBinary_mod(aCopie, n);
+    libereBigBinary(&aCopie);
+    for (int i = IndicePremierBit + 1; i < 32; i++) {
+        BigBinary temp = multiplicationEgyptienne(result, result);
+        libereBigBinary(&result);
+        result = BigBinary_mod(temp, n);
+        libereBigBinary(&temp);
         if (bits[i] == 1) {
-            result = BigBinary_mod(multiplicationEgyptienne(result, a),n);
+            temp = multiplicationEgyptienne(result, a);
+            libereBigBinary(&result);
+            result = BigBinary_mod(temp, n);
+            libereBigBinary(&temp);
         }
     }
+    retirerZeroBigBinary(&result);
     return result;
-    //10000000000000000000000000000000000000000001111111010110100101011011011001011001010111010
-    //10100011000010111111011001110010101101100100111110001101000001001111000000110000111010111
 }
 
 
-BigBinary chiffrement_RSA(BigBinary a , BigBinary n , unsigned int e) {
-    return BigBinary_expo(a,n,e);
+BigBinary chiffrement_RSA(BigBinary message , BigBinary clepublicN , unsigned int clepublicE) {
+    return BigBinary_expo(message,clepublicN,clepublicE);
 }
 
-BigBinary dechiffrement_RSA(BigBinary a , BigBinary n , unsigned int e) {
-    return initBigBinary(1,1);
+BigBinary dechiffrement_RSA(BigBinary messageChiffre , BigBinary clepublicN , unsigned int clepriveE){
+    return BigBinary_expo(messageChiffre,clepublicN,clepriveE);
 }
-
-
-
 
 
 int main() {
+    BigBinary M = creeBigBinaryDepuisChaine("11000011010011111");
+    BigBinary N5 = creeBigBinaryDepuisChaine("100100111110110100001");
+    BigBinary C = chiffrement_RSA(M, N5, 101);
+    BigBinary D = chiffrement_RSA(C, N5, 251501);
 
-    printf("Test 6: 15 * 8 (1111 * 1000)\n");
-    BigBinary m11 = creeBigBinaryDepuisChaine("11000011010011111");  // 15
-    BigBinary m12 = creeBigBinaryDepuisChaine("1001001110101111100001");  // 8
-    BigBinary resM6 = chiffrement_RSA(m11 ,m12 , 101 );
-    printf("Resultat: ");
-    afficherBigBinary(resM6);
-    libereBigBinary(&m11);
-    libereBigBinary(&m12);
-    libereBigBinary(&resM6);
+    printf("Message (M):  ");
+    afficherBigBinary(M);
+    printf("Modulo (N):   ");
+    afficherBigBinary(N5);
+    printf("Chiffre (C):  ");
+    afficherBigBinary(C);
+    printf("\nAttendu:      10001001001001011000\n");
 
+    afficherBigBinary(D);
 
-    /*
-    // Test 6: Grand nombre
-    printf("Test 6: 15 * 8 (1111 * 1000)\n");
-    BigBinary m11 = creeBigBinaryDepuisChaine("1111");  // 15
-    BigBinary m12 = creeBigBinaryDepuisChaine("1000");  // 8
-    BigBinary resM6 = multiplicationEgyptienne(m11, m12);
-    printf("Resultat: ");
-    afficherBigBinary(resM6);
-    printf("Attendu:  1111000 (120 en decimal)\n");
-    printf("Verification: 15 * 8 = 120 ✓\n\n");
-    libereBigBinary(&m11);
-    libereBigBinary(&m12);
-    libereBigBinary(&resM6);*/
+    libereBigBinary(&M);
+    libereBigBinary(&N5);
+    libereBigBinary(&C);
 
     return 0;
 }
