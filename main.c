@@ -238,7 +238,7 @@ BigBinary multiplicationEgyptienne(BigBinary bigBinary1, BigBinary bigBinary2) {
     result.Tdigits[0] = 0;
     BigBinary puissance = copiesBigBinary(bigBinary1);
     for (int i = bigBinary2.taille - 1; i >= 0; i--) {
-        if (bigBinary2.Tdigits[i] == 1) {  // Bit LSB = 1 ?
+        if (bigBinary2.Tdigits[i] == 1) {
             BigBinary temp = additionBigBinary(result, puissance);
             libereBigBinary(&result);
             result = temp;
@@ -309,44 +309,25 @@ BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
 }
 
 BigBinary BigBinary_expo(BigBinary a, BigBinary n, unsigned int e) {
-    if (e == 0) {
-        BigBinary result = initBigBinary(1, 1);
-        result.Tdigits[0] = 1;
-        return result;
-    }
-    unsigned int bits[32];
-    for (int i = 0; i < 32; i++) {
-        bits[31 - i] = (e >> i) & 1;
-    }
-    int IndicePremierBit = -1;
-    for (int i = 0; i < 32; i++) {
-        if (bits[i] == 1) {
-            IndicePremierBit = i;
-            break;
-        }
-    }
-    if (IndicePremierBit == -1) {
-        BigBinary result = initBigBinary(1, 1);
-        result.Tdigits[0] = 1;
-        return result;
-    }
-    BigBinary aCopie = copiesBigBinary(a);
-    BigBinary result = BigBinary_mod(aCopie, n);
-    libereBigBinary(&aCopie);
-    for (int i = IndicePremierBit + 1; i < 32; i++) {
-        BigBinary temp = multiplicationEgyptienne(result, result);
-        libereBigBinary(&result);
-        result = BigBinary_mod(temp, n);
-        libereBigBinary(&temp);
-        if (bits[i] == 1) {
-            temp = multiplicationEgyptienne(result, a);
-            libereBigBinary(&result);
-            result = BigBinary_mod(temp, n);
+    BigBinary resultat = initBigBinary(1, 1);
+    resultat.Tdigits[0] = 1;
+    BigBinary base = BigBinary_mod(a,n);
+    while (e>0) {
+        if (e%2 == 1) {
+            BigBinary temp = multiplicationEgyptienne(resultat, base);
+            libereBigBinary(&resultat);
+            resultat = BigBinary_mod(temp, n);
             libereBigBinary(&temp);
         }
+        BigBinary temp2 = multiplicationEgyptienne(base, base);
+        libereBigBinary(&base);
+        base = BigBinary_mod(temp2, n);
+        libereBigBinary(&temp2);
+        e = e/2;
     }
-    retirerZeroBigBinary(&result);
-    return result;
+
+    return resultat;
+
 }
 
 
@@ -357,6 +338,8 @@ BigBinary chiffrement_RSA(BigBinary message , BigBinary clepublicN , unsigned in
 BigBinary dechiffrement_RSA(BigBinary messageChiffre , BigBinary clepublicN , unsigned int clepriveE){
     return BigBinary_expo(messageChiffre,clepublicN,clepriveE);
 }
+
+
 
 
 int main() {
