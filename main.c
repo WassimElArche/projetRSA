@@ -11,6 +11,22 @@ typedef struct{
 } BigBinary;
 
 
+void retirerZeroBigBinary(BigBinary *a) {
+    int i = 0;
+    while (i < a->taille && a->Tdigits[i] == 0) i++;
+    if (i == a->taille) {
+        a->taille = 1;
+        a->Signe = 0;
+        a->Tdigits[0] = 0;
+        return;
+    }
+    for (int j = i; j < a->taille; j++) {
+        a->Tdigits[j - i] = a->Tdigits[j];
+    }
+    a->taille -= i;
+    a->Signe = 1;
+}
+
 BigBinary creeBigBinaryDepuisChaine(const char *chaine) {
     BigBinary nb;
     int n = strlen(chaine);
@@ -218,6 +234,7 @@ BigBinary BigBinary_PGCD(BigBinary a , BigBinary b){
             v = soustractionBigBinary(v,u);
         }
     }
+    retirerZeroBigBinary(&u);
     return u;
 }
 
@@ -254,21 +271,7 @@ BigBinary multiplicationEgyptienne(BigBinary bigBinary1, BigBinary bigBinary2) {
     return result;
 }
 
-void retirerZeroBigBinary(BigBinary *a) {
-    int i = 0;
-    while (i < a->taille && a->Tdigits[i] == 0) i++;
-    if (i == a->taille) {
-        a->taille = 1;
-        a->Signe = 0;
-        a->Tdigits[0] = 0;
-        return;
-    }
-    for (int j = i; j < a->taille; j++) {
-        a->Tdigits[j - i] = a->Tdigits[j];
-    }
-    a->taille -= i;
-    a->Signe = 1;
-}
+
 
 BigBinary BigBinary_mod(BigBinary a , BigBinary b) {
     BigBinary resultat = copiesBigBinary(a);
@@ -343,24 +346,67 @@ BigBinary dechiffrement_RSA(BigBinary messageChiffre , BigBinary clepublicN , un
 
 
 int main() {
-    BigBinary M = creeBigBinaryDepuisChaine("11000011010011111");
-    BigBinary N5 = creeBigBinaryDepuisChaine("100100111110110100001");
-    BigBinary C = chiffrement_RSA(M, N5, 101);
-    BigBinary D = chiffrement_RSA(C, N5, 251501);
+    BigBinary a = creeBigBinaryDepuisChaine("11010101100101");
+    BigBinary b = creeBigBinaryDepuisChaine("1010111");
 
-    printf("Message (M):  ");
-    afficherBigBinary(M);
-    printf("Modulo (N):   ");
-    afficherBigBinary(N5);
-    printf("Chiffre (C):  ");
-    afficherBigBinary(C);
-    printf("\nAttendu:      10001001001001011000\n");
+    printf("test egalite\n");
+    printf(egaliteBigBinary(a, b) ? "egal\n" : "pas egal\n");
 
-    afficherBigBinary(D);
+    printf("\ntest inferieur\n");
+    printf(inferieurBigBinary(a, b) ? "a plus petit\n" : "a plus grand\n");
 
-    libereBigBinary(&M);
-    libereBigBinary(&N5);
-    libereBigBinary(&C);
+    printf("\ntest addition\n");
+    BigBinary add = additionBigBinary(a, b);
+    afficherBigBinary(add);
+
+    printf("\ntest soustraction\n");
+    BigBinary sub;
+    if (inferieurBigBinary(a, b))
+        sub = soustractionBigBinary(b, a);
+    else
+        sub = soustractionBigBinary(a, b);
+    afficherBigBinary(sub);
+
+    printf("\ntest multiplication\n");
+    BigBinary mul = multiplicationEgyptienne(a, b);
+    afficherBigBinary(mul);
+
+    printf("\ntest pgcd\n");
+    BigBinary g = BigBinary_PGCD(a, b);
+    afficherBigBinary(g);
+
+    printf("\ntest modulo\n");
+    BigBinary mod = BigBinary_mod(a, b);
+    afficherBigBinary(mod);
+
+    printf("\ntest exposition modulaire\n");
+    BigBinary expmod = BigBinary_expo(a, b, 13);
+    afficherBigBinary(expmod);
+
+    libereBigBinary(&a);
+    libereBigBinary(&b);
+
+    BigBinary aa = creeBigBinaryDepuisChaine("11000011010011111");
+    BigBinary nn = creeBigBinaryDepuisChaine("100100111110110100001");
+
+    printf("\ntest chiffrement\n");
+    BigBinary ch = chiffrement_RSA(aa, nn, 101);
+    afficherBigBinary(ch);
+
+    printf("\ntest dechiffrement\n");
+    BigBinary de = dechiffrement_RSA(ch, nn, 251501);
+    afficherBigBinary(de);
+
+    libereBigBinary(&a);
+    libereBigBinary(&b);
+    libereBigBinary(&add);
+    libereBigBinary(&sub);
+    libereBigBinary(&mul);
+    libereBigBinary(&g);
+    libereBigBinary(&mod);
+    libereBigBinary(&expmod);
+    libereBigBinary(&ch);
+    libereBigBinary(&de);
 
     return 0;
 }
